@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,9 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     public interface OnMapaListener {
         public void coordenadasSeleccionadas(LatLng c);
     }
-
+    public void setListener(OnMapaListener listener) {
+        this.listener = listener;
+    }
     public MapaFragment() {
         // Required empty public constructor
     }
@@ -55,6 +58,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
         }
 
+
+
         getMapAsync(this);
         return rootView;
     }
@@ -63,7 +68,15 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     public void onMapReady(GoogleMap googleMap) {
 
         miMapa = googleMap;
-
+        miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                if(tipoMapa == 1){
+                    Log.d("LONGPRESS","Se recibio un longpress en el mapa de tipo 1");
+                    listener.coordenadasSeleccionadas(latLng);
+                }
+            }
+        });
         actualizarMapa();
     }
 
@@ -83,9 +96,6 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-    public void setListener(OnMapaListener listener) {
-        this.listener = listener;
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
