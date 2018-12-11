@@ -64,14 +64,22 @@ public class NuevoReclamoFragment extends Fragment {
         tipoReclamo.setAdapter(tipoReclamoAdapter);
 
         int idReclamo =0;
-        if(getArguments()!=null)  {
-            idReclamo = getArguments().getInt("idReclamo",0);
+        Bundle b = null;
+        b = getArguments();
+        double lat = 0;
+        double lng = 0;
+        if(b!=null)  {
+            idReclamo = b.getInt("idReclamo",0);
+
+            lat = b.getDouble("Lat",0);
+            lng=  b.getDouble("Lng",0);
+
         }
 
         cargarReclamo(idReclamo);
 
-
-        boolean edicionActivada = !tvCoord.getText().toString().equals("0;0");
+        tvCoord.setText(lat+";"+lng);
+        boolean edicionActivada = !tvCoord.getText().toString().equals("0.0;0.0");
         reclamoDesc.setEnabled(edicionActivada );
         mail.setEnabled(edicionActivada );
         tipoReclamo.setEnabled(edicionActivada);
