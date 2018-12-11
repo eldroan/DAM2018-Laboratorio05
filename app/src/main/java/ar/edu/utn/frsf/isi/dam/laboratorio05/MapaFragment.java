@@ -19,11 +19,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,6 +43,9 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private int tipoMapa;
     private GoogleMap miMapa;
     private OnMapaListener listener;
+
+
+
 
     public interface OnMapaListener {
         public void coordenadasSeleccionadas(LatLng c);
@@ -58,7 +71,17 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
         }
 
-
+        /*if(tipoMapa == 2)
+        {
+            reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
+            *//*reclamos = reclamoDao.getAll();*//*
+        }
+        else
+        {
+            *//*reclamos = null;*//*
+            reclamoDao = null;
+            reclamos = null;
+        }*/
 
         getMapAsync(this);
         return rootView;
@@ -77,7 +100,51 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 }
             }
         });
+
+        if(tipoMapa == 2 ){
+
+            configurarMapaConReclamos();
+
+        }
         actualizarMapa();
+    }
+
+    private void configurarMapaConReclamos() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                final List <Reclamo> reclamos = MyDatabase.getInstance(MapaFragment.this.getActivity()).getReclamoDao().getAll();
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(reclamos.isEmpty() == false){
+                            LatLngBounds.Builder boundBuilder =  new LatLngBounds.Builder();
+                            for(Reclamo r : reclamos){
+                                //Creo el marker
+                                MarkerOptions currentMarker = new MarkerOptions();
+                                currentMarker.position(new LatLng(r.getLatitud(),r.getLongitud()));
+                                currentMarker.title(r.getReclamo());
+
+                                //Lo agrego al mapa
+                                miMapa.addMarker(currentMarker);
+
+                                //Lo incluyo en los bounds
+                                boundBuilder.include(currentMarker.getPosition());
+                            }
+                            /*LatLngBounds b = boundBuilder.build();
+                            b.*/
+                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 100);
+
+                            miMapa.moveCamera(cu );
+                            actualizarMapa();
+                        }
+                    }
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void actualizarMapa() {
