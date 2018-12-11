@@ -156,7 +156,7 @@ public class NuevoReclamoFragment extends Fragment {
                     public void run() {
                         // limpiar vista
                         mail.setText(R.string.texto_vacio);
-                        tvCoord.setText(R.string.texto_vacio);
+                        tvCoord.setText("0.0;0.0");
                         reclamoDesc.setText(R.string.texto_vacio);
                         getActivity().getFragmentManager().popBackStack();
                     }
