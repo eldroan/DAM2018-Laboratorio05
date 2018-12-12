@@ -19,6 +19,10 @@ public class FormularioBusquedaFragment extends Fragment implements View.OnClick
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     private Spinner tipoReclamo;
     private Button bttnBuscar;
+    private MapaFragment.OnMapaListener mapaListener;
+    public void setListener(MapaFragment.OnMapaListener listener) {
+        this.mapaListener = listener;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -37,7 +41,30 @@ public class FormularioBusquedaFragment extends Fragment implements View.OnClick
     public void onClick(View v) {
         if(v == bttnBuscar){
             Reclamo.TipoReclamo tr = tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition());
-            Toast.makeText(getContext(),tr.toString() + " APRETADO!",Toast.LENGTH_LONG).show();
+            /*Toast.makeText(getContext(),tr.toString() + " APRETADO!",Toast.LENGTH_LONG).show();*/
+
+            Fragment fragment = null;
+            String tag="mapaReclamos";
+            fragment =  getFragmentManager().findFragmentByTag(tag);
+            //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
+            if(fragment == null){
+                fragment = new MapaFragment();
+                ((MapaFragment) fragment).setListener(mapaListener);
+            }
+
+            Bundle b = new Bundle();
+
+            // pasando como parametro un bundle con "tipo_mapa"
+            b.putInt("tipo_mapa",5);
+            b.putString("ripo_reclamo", tr.toString());
+            fragment.setArguments(b);
+
+
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.contenido, fragment,tag)
+                    .addToBackStack(null)
+                    .commit();
         }
     }
 }

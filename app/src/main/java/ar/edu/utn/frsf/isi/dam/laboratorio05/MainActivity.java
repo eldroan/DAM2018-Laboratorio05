@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
                                 if(fragment == null){
                                     fragment = new FormularioBusquedaFragment();
-                                    /*((FormularioBusquedaFragment) fragment).setListener(MainActivity.this);*/
+                                    ((FormularioBusquedaFragment) fragment).setListener(MainActivity.this);
 
                                 }
                                 fragmentTransaction = true;
