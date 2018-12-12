@@ -1,9 +1,13 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
+import android.graphics.Bitmap;
+import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +15,15 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
@@ -20,8 +31,29 @@ import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 public class NuevoReclamoFragment extends Fragment {
 
+    public void setImagePath(String pathPhoto) {
+        File file = new File(pathPhoto);
+
+        Bitmap imageBitmap = null;
+
+        try {
+            imageBitmap = MediaStore.Images.Media
+                    .getBitmap(getActivity().getApplicationContext().getContentResolver(),
+                            Uri.fromFile(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (imageBitmap != null) {
+            imageView.setImageBitmap(imageBitmap);
+        }
+    }
+
     public interface OnNuevoLugarListener {
         public void obtenerCoordenadas();
+        public void sacarGuardarFoto();
+        public String getPhotoPath();
+
+
     }
 
     public void setListener(OnNuevoLugarListener listener) {
@@ -37,6 +69,8 @@ public class NuevoReclamoFragment extends Fragment {
     private TextView tvCoord;
     private Button buscarCoord;
     private Button btnGuardar;
+    private Button btnFoto;
+    private ImageView imageView;
     private OnNuevoLugarListener listener;
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
@@ -58,6 +92,15 @@ public class NuevoReclamoFragment extends Fragment {
         tvCoord= (TextView) v.findViewById(R.id.reclamo_coord);
         buscarCoord= (Button) v.findViewById(R.id.btnBuscarCoordenadas);
         btnGuardar= (Button) v.findViewById(R.id.btnGuardar);
+        btnFoto = (Button) v.findViewById(R.id.btnTomarFoto);
+        imageView = (ImageView) v.findViewById(R.id.image_view);
+
+        btnFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.sacarGuardarFoto();
+            }
+        });
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(),android.R.layout.simple_spinner_item,Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -166,6 +209,7 @@ public class NuevoReclamoFragment extends Fragment {
         Thread t1 = new Thread(hiloActualizacion);
         t1.start();
     }
+
 
 
 }
