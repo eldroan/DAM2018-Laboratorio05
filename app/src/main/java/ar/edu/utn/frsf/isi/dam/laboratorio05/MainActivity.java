@@ -1,8 +1,14 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +16,11 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 // AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas 
@@ -19,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         NuevoReclamoFragment.OnNuevoLugarListener, MapaFragment.OnMapaListener {
     private DrawerLayout drawerLayout;
     private NavigationView navView;
+    private String pathPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         //Handle when activity is recreated like on orientation Change
+
         shouldDisplayHomeUp();
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         navView = (NavigationView)findViewById(R.id.navview);
@@ -51,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new NuevoReclamoFragment();
                                     ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
                                 }
+                                Bundle nrb = new Bundle();
+                                nrb.putBoolean("trySettingPhoto", false);
+                                fragment.setArguments(nrb);
 
                                 fragmentTransaction = true;
                                 break;
@@ -141,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         //Enable Up button only  if there are entries in the back stack
         boolean canback = getSupportFragmentManager().getBackStackEntryCount()>0;
         getSupportActionBar().setDisplayHomeAsUpEnabled(canback);
+
     }
 
     // AGREGAR en MapaFragment una interface OnMapaListener con el método coordenadasSeleccionadas
@@ -206,6 +223,29 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         }
 
     @Override
+    public void sacarGuardarFoto() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) { }
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            startActivityForResult(takePictureIntent, 1337);
+            }
+        }
+    }
+
+    @Override
+    public String getPhotoPath() {
+        return pathPhoto;
+    }
+
+    @Override
     public void coordenadasSeleccionadas(LatLng c) {
         String tag = "nuevoReclamoFragment";
         Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
@@ -216,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         }
         b.putDouble("Lat",c.latitude);
         b.putDouble("Lng",c.longitude);
+        b.putBoolean("trySettingPhoto", true);
         fragment.setArguments(b);
         //Deberia setear el listener? Supongo que no porque este fragment ya viene de creado
 
@@ -227,4 +268,39 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         getSupportFragmentManager().popBackStack(); //Este es para volver a la anterior
 
     }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName,".jpg",dir);
+
+        pathPhoto = image.getAbsolutePath();
+        return image;
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode,int resCode, Intent data) {
+
+        if (reqCode == 1337 && resCode == RESULT_OK) {
+            /*File file = new File(pathPhoto);
+            Bitmap imageBitmap = null;
+            try {
+                imageBitmap = MediaStore.Images.Media
+                        .getBitmap(getContentResolver(),
+                                Uri.fromFile(file));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (imageBitmap != null) {
+                foto.setImageBitmap(imageBitmap);
+            }*/
+            String tag = "nuevoReclamoFragment";
+            Fragment fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+            ((NuevoReclamoFragment)fragment).setImagePath(pathPhoto);
+        }
+    }
+
+
 }
