@@ -49,6 +49,7 @@ public class ListaReclamosFragment extends Fragment {
     ReclamoArrayAdapter.OnReclamoListener eventosAdapterManager = new ReclamoArrayAdapter.OnReclamoListener() {
         @Override
         public void editarReclamo(int id) {
+
             NuevoReclamoFragment f = new NuevoReclamoFragment ();
             // Supply index input as an argument.
             Bundle args = new Bundle();
@@ -79,8 +80,13 @@ public class ListaReclamosFragment extends Fragment {
 
         @Override
         public void mostrarMapa(int id) {
-            Fragment f = null;// setear el fragmento del mapa
+            Fragment f = getFragmentManager().findFragmentByTag("mapaReclamos");// setear el fragmento del mapa
+            if(f == null){
+                f = new MapaFragment();
+            }
             Bundle args = new Bundle();
+            args.putInt("tipo_mapa", 3);
+            args.putInt("idReclamo",id);
             // setear los parametros tipo_mapa y idReclamo en el Bundle args
             f.setArguments(args);
             getActivity().getSupportFragmentManager()
