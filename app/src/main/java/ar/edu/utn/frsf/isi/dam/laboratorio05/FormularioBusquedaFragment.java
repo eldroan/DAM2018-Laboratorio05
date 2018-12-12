@@ -56,7 +56,7 @@ public class FormularioBusquedaFragment extends Fragment implements View.OnClick
 
             // pasando como parametro un bundle con "tipo_mapa"
             b.putInt("tipo_mapa",5);
-            b.putString("ripo_reclamo", tr.toString());
+            b.putString("tipo_reclamo", tr.toString());
             fragment.setArguments(b);
 
 
