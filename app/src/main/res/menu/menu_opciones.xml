@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/optListaReclamo" android:title="Listar Reclamos"></item>
-    <item android:id="@+id/optNuevoReclamo" android:title="Nuevo Reclamo"></item>
-    <item android:id="@+id/optVerMapa" android:title="Ver en Mapa"></item>
-    <item android:id="@+id/optHeatMap" android:title="HeatMap"></item>
+    <item
+        android:id="@+id/optListaReclamo"
+        android:title="Listar Reclamos"></item>
+    <item
+        android:id="@+id/optNuevoReclamo"
+        android:title="Nuevo Reclamo"></item>
+    <item
+        android:id="@+id/optVerMapa"
+        android:title="Ver en Mapa"></item>
+    <item
+        android:id="@+id/optHeatMap"
+        android:title="HeatMap"></item>
+    <item
+        android:id="@+id/optFormularioDeBusqueda"
+        android:layout_width="match_parent"
+        android:title="Formulario de búsqueda"></item>
 </menu>

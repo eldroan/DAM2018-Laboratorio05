@@ -67,25 +67,40 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
                                 if(fragment == null){
                                     fragment = new MapaFragment();
+                                    ((MapaFragment) fragment).setListener(MainActivity.this);
 
-                                    Bundle b = new Bundle();
-                                    b.putInt("tipo_mapa",4);
-
-                                    fragment.setArguments(b);
                                 }
-                                // configurar a la actividad como listener de los eventos del mapa
-                                ((MapaFragment) fragment).setListener(MainActivity.this);
+                                Bundle b = new Bundle();
+                                b.putInt("tipo_mapa",2);
+
+                                fragment.setArguments(b);
                                 //((MapaFragment) fragment).setListener(MainActivity.this);
 
                                fragmentTransaction = true;
                                 break;
                             case R.id.optHeatMap:
-                                //TODO HABILITAR
-                                //tag="mapaReclamos";
-                                //fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-                                //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
-                                // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
-                               // fragmentTransaction = true;
+                                tag="mapaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment == null){
+                                    fragment = new MapaFragment();
+                                    ((MapaFragment) fragment).setListener(MainActivity.this);
+
+                                }
+                                Bundle bu = new Bundle();
+                                bu.putInt("tipo_mapa",4);
+
+                                fragment.setArguments(bu);
+                               fragmentTransaction = true;
+                                break;
+                            case R.id.optFormularioDeBusqueda:
+                                tag="formularioBusqueda";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment == null){
+                                    fragment = new FormularioBusquedaFragment();
+                                    ((FormularioBusquedaFragment) fragment).setListener(MainActivity.this);
+
+                                }
+                                fragmentTransaction = true;
                                 break;
                         }
 
