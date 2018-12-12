@@ -191,6 +191,7 @@ public class NuevoReclamoFragment extends Fragment {
         reclamoActual.setEmail(mail.getText().toString());
         reclamoActual.setReclamo(reclamoDesc.getText().toString());
         reclamoActual.setTipo(tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition()));
+        reclamoActual.setImagePath(pathOfPhoto);
         if(tvCoord.getText().toString().length()>0 && tvCoord.getText().toString().contains(";")) {
             String[] coordenadas = tvCoord.getText().toString().split(";");
             reclamoActual.setLatitud(Double.valueOf(coordenadas[0]));
@@ -200,8 +201,10 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void run() {
 
-                if(reclamoActual.getId()>0) reclamoDao.update(reclamoActual);
-                else reclamoDao.insert(reclamoActual);
+                if(reclamoActual.getId()>0)
+                    reclamoDao.update(reclamoActual);
+                else
+                    reclamoDao.insert(reclamoActual);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -209,6 +212,14 @@ public class NuevoReclamoFragment extends Fragment {
                         mail.setText(R.string.texto_vacio);
                         tvCoord.setText("0.0;0.0");
                         reclamoDesc.setText(R.string.texto_vacio);
+                        imageView.setImageBitmap(null);
+                        pathOfPhoto = null;
+                        boolean edicionActivada = !tvCoord.getText().toString().equals("0.0;0.0");
+                        reclamoDesc.setEnabled(edicionActivada );
+                        mail.setEnabled(edicionActivada );
+                        tipoReclamo.setEnabled(edicionActivada);
+                        btnGuardar.setEnabled(edicionActivada);
+
                         getActivity().getFragmentManager().popBackStack();
                     }
                 });
