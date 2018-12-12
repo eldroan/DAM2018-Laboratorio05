@@ -64,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new NuevoReclamoFragment();
                                     ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
                                 }
+                                Bundle nrb = new Bundle();
+                                nrb.putBoolean("trySettingPhoto", false);
+                                fragment.setArguments(nrb);
 
                                 fragmentTransaction = true;
                                 break;
@@ -253,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         }
         b.putDouble("Lat",c.latitude);
         b.putDouble("Lng",c.longitude);
+        b.putBoolean("trySettingPhoto", true);
         fragment.setArguments(b);
         //Deberia setear el listener? Supongo que no porque este fragment ya viene de creado
 

@@ -32,6 +32,7 @@ import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 public class NuevoReclamoFragment extends Fragment {
 
     public void setImagePath(String pathPhoto) {
+        pathOfPhoto = pathPhoto;
         File file = new File(pathPhoto);
 
         Bitmap imageBitmap = null;
@@ -72,6 +73,7 @@ public class NuevoReclamoFragment extends Fragment {
     private Button btnFoto;
     private ImageView imageView;
     private OnNuevoLugarListener listener;
+    private static  String pathOfPhoto;
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
@@ -116,6 +118,12 @@ public class NuevoReclamoFragment extends Fragment {
 
             lat = b.getDouble("Lat",0);
             lng=  b.getDouble("Lng",0);
+
+            if(b.getBoolean("trySettingPhoto",false) && pathOfPhoto != null && !pathOfPhoto.isEmpty()){
+                setImagePath(pathOfPhoto);
+            }else{
+                pathOfPhoto = null;
+            }
 
         }
 
