@@ -5,6 +5,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -41,6 +43,7 @@ import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback, OnRequestPermissionsResultCallback {
 
     private int tipoMapa;
+    private int idReclamo;
     private GoogleMap miMapa;
     private OnMapaListener listener;
 
@@ -69,20 +72,8 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
         if (argumentos != null) {
             tipoMapa = argumentos.getInt("tipo_mapa", 0);
+            idReclamo = argumentos.getInt("idReclamo", -1);
         }
-
-        /*if(tipoMapa == 2)
-        {
-            reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
-            *//*reclamos = reclamoDao.getAll();*//*
-        }
-        else
-        {
-            *//*reclamos = null;*//*
-            reclamoDao = null;
-            reclamos = null;
-        }*/
-
         getMapAsync(this);
         return rootView;
     }
@@ -91,22 +82,64 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     public void onMapReady(GoogleMap googleMap) {
 
         miMapa = googleMap;
-        miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                if(tipoMapa == 1){
-                    Log.d("LONGPRESS","Se recibio un longpress en el mapa de tipo 1");
-                    listener.coordenadasSeleccionadas(latLng);
-                }
-            }
-        });
 
-        if(tipoMapa == 2 ){
+        miMapa.setOnMapLongClickListener(null);
 
-            configurarMapaConReclamos();
-
+        switch (tipoMapa){
+            case 1:
+                miMapa.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        Log.d("LONGPRESS","Se recibio un longpress en el mapa de tipo 1");
+                        listener.coordenadasSeleccionadas(latLng);
+                    }
+                });
+                break;
+            case 2:
+                configurarMapaConReclamos();
+                break;
+            case 3:
+                configurarMapaConCirculoRojo();
+                break;
+            default:
+                    break;
         }
         actualizarMapa();
+    }
+
+    private void configurarMapaConCirculoRojo() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                final Reclamo reclamo = MyDatabase.getInstance(MapaFragment.this.getActivity()).getReclamoDao().getById(idReclamo);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MarkerOptions currentMarker = new MarkerOptions();
+                        currentMarker.position(new LatLng(reclamo.getLatitud(),reclamo.getLongitud()));
+                        currentMarker.title(reclamo.getReclamo());
+
+                        miMapa.addMarker(currentMarker);
+                        CircleOptions co = new CircleOptions();
+                        co.radius(500);
+                        co.center(currentMarker.getPosition());
+                        co.fillColor(Color.argb(51 ,0,0,255));
+                        co.strokeColor(Color.argb(255,255,0,255));
+                        co.strokeWidth(2);
+                        miMapa.addCircle(co);
+                        /*LatLngBounds.Builder llb = new LatLngBounds.Builder();
+                        llb.include(currentMarker.getPosition());
+                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(llb.build(),1000));*/
+                        miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(),15));
+                        actualizarMapa();
+                    }
+
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void configurarMapaConReclamos() {
