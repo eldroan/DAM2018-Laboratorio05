@@ -30,7 +30,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
@@ -101,10 +104,49 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             case 3:
                 configurarMapaConCirculoRojo();
                 break;
+            case 4:
+                configurarMapaComoHeatMap();
+                break;
             default:
                     break;
         }
         actualizarMapa();
+    }
+
+    private void configurarMapaComoHeatMap() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                final List <Reclamo> reclamos = MyDatabase.getInstance(MapaFragment.this.getActivity()).getReclamoDao().getAll();
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(reclamos.isEmpty() == false){
+                            HeatmapTileProvider.Builder heatTileBuilder = new HeatmapTileProvider.Builder();
+                            LatLngBounds.Builder boundBuilder =  new LatLngBounds.Builder();
+                            ArrayList<LatLng> latlngs = new ArrayList<LatLng>();
+
+                            for(Reclamo r : reclamos){
+                                LatLng ll = new LatLng(r.getLatitud(),r.getLongitud());
+                                latlngs.add(ll);
+                                boundBuilder.include(ll);
+                            }
+
+                            heatTileBuilder.data(latlngs);
+
+                            miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(heatTileBuilder.build()));
+                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 100);
+
+                            miMapa.moveCamera(cu );
+                            actualizarMapa();
+                        }
+                    }
+                });
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     private void configurarMapaConCirculoRojo() {
@@ -132,6 +174,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         llb.include(currentMarker.getPosition());
                         miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(llb.build(),1000));*/
                         miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(),15));
+
                         actualizarMapa();
                     }
 
