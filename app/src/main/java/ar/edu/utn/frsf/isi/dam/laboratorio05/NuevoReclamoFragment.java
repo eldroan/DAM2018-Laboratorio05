@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -233,6 +234,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
             case R.id.btnParar:
                 if(estadoBotones == Estado.GRABANDO){
                     // Esta grabando
+                    finalizarGrabacionDeAudio();
                 }else{
                     // Esta reproduciendo
                 }
@@ -249,6 +251,8 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                 break;
         }
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -267,9 +271,45 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
         }
     }
 
+    private MediaRecorder rec;
+    private void finalizarGrabacionDeAudio() {
+        rec.stop();
+        rec.release();
+        rec = null;
+    }
     private void comenzarGrabacionDeAudio() {
         actualizarBotonesDeReproducción(Estado.GRABANDO);
-        Toast.makeText(getContext(),"Comienza la grabación",Toast.LENGTH_SHORT).show();
+
+        String file_path=getActivity().getApplicationContext().getFilesDir().getPath();
+        File file= new File(file_path);
+
+        Long date=new Date().getTime();
+        Date current_time = new Date(Long.valueOf(date));
+
+        rec=new MediaRecorder();
+
+        rec.setAudioSource(MediaRecorder.AudioSource.MIC);
+        rec.setAudioChannels(1);
+        rec.setAudioSamplingRate(8000);
+        rec.setAudioEncodingBitRate(44100);
+        rec.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        rec.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        if (!file.exists()){
+            file.mkdirs();
+        }
+
+        String file_name=file+"/"+current_time+".3gp";
+        rec.setOutputFile(file_name);
+
+        try {
+            rec.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+            
+            return;
+        }
+        rec.start();
     }
 
 
