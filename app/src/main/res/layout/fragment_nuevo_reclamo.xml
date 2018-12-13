@@ -12,14 +12,35 @@
         <ImageView
             android:id="@+id/image_view"
             android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
             android:src="@mipmap/ic_launcher"/>
         <Button
             android:text="Tomar Foto"
             android:id="@+id/btnTomarFoto"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:text="Grabar"
+            android:id="@+id/btnGrabar"
+            android:layout_marginLeft="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:text="Reproducir"
+            android:id="@+id/btnReproducir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:text="Parar"
+            android:id="@+id/btnParar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
     <TextView
         android:text="Coordenadas"
