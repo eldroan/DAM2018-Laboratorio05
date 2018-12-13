@@ -368,6 +368,12 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud()+";"+reclamoActual.getLongitud());
                             reclamoDesc.setText(reclamoActual.getReclamo());
+                            setImagePath(reclamoActual.getImagePath());
+                            file_name = reclamoActual.getVoicePath();
+                            if(file_name != null){
+                                estadoBotones = Estado.GRABACIONFINALIZADA;
+                                actualizarBotonesDeReproducción(estadoBotones);
+                            }
                             Reclamo.TipoReclamo[] tipos= Reclamo.TipoReclamo.values();
                             for(int i=0;i<tipos.length;i++) {
                                 if(tipos[i].equals(reclamoActual.getTipo())) {
@@ -395,6 +401,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
         reclamoActual.setReclamo(reclamoDesc.getText().toString());
         reclamoActual.setTipo(tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition()));
         reclamoActual.setImagePath(pathOfPhoto);
+        reclamoActual.setVoicePath(file_name);
         if(tvCoord.getText().toString().length()>0 && tvCoord.getText().toString().contains(";")) {
             String[] coordenadas = tvCoord.getText().toString().split(";");
             reclamoActual.setLatitud(Double.valueOf(coordenadas[0]));
