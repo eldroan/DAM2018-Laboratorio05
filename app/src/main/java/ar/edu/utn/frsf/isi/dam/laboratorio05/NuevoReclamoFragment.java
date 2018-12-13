@@ -4,7 +4,9 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.media.Image;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +28,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOError;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -85,6 +89,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
     private ImageView imageView;
     private OnNuevoLugarListener listener;
     private static  String pathOfPhoto;
+    private static String file_name;
 
     private Button btnGrabar;
     private Button btnReproducir;
@@ -93,6 +98,10 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
     private Estado estadoBotones;
 
     private enum Estado { NADA,GRABANDO,GRABACIONFINALIZADA,REPRODUCIENDO}
+
+    private MediaRecorder rec;
+    private MediaPlayer mediaPlayer;
+
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
@@ -160,6 +169,14 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
             }else{
                 pathOfPhoto = null;
             }
+            if(b.getBoolean("resetRecordPath",true) ){
+                file_name = null;
+            }else{
+                if(file_name != null){
+                    //Hay un archivo grabado
+                    actualizarBotonesDeReproducción(Estado.GRABACIONFINALIZADA);
+                }
+            }
 
         }
 
@@ -225,11 +242,28 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                 }else{
                     //Tengo permisos
                     comenzarGrabacionDeAudio();
+
                 }
 
                 break;
             case R.id.btnReproducir:
                 actualizarBotonesDeReproducción(Estado.REPRODUCIENDO);
+                estadoBotones = Estado.REPRODUCIENDO;
+                FileInputStream fileInputStream = null;
+                mediaPlayer = new MediaPlayer();
+                try {
+                    fileInputStream = new FileInputStream(file_name);
+                    mediaPlayer.setDataSource(fileInputStream.getFD());
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case R.id.btnParar:
                 if(estadoBotones == Estado.GRABANDO){
@@ -237,6 +271,12 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                     finalizarGrabacionDeAudio();
                 }else{
                     // Esta reproduciendo
+                    if(mediaPlayer != null){
+                        mediaPlayer.stop();
+                        mediaPlayer.release();
+                        mediaPlayer = null;
+                    }
+
                 }
                 actualizarBotonesDeReproducción(Estado.GRABACIONFINALIZADA);
                 break;
@@ -271,7 +311,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
         }
     }
 
-    private MediaRecorder rec;
+
     private void finalizarGrabacionDeAudio() {
         rec.stop();
         rec.release();
@@ -279,6 +319,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
     }
     private void comenzarGrabacionDeAudio() {
         actualizarBotonesDeReproducción(Estado.GRABANDO);
+        estadoBotones = Estado.GRABANDO;
 
         String file_path=getActivity().getApplicationContext().getFilesDir().getPath();
         File file= new File(file_path);
@@ -299,17 +340,18 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
             file.mkdirs();
         }
 
-        String file_name=file+"/"+current_time+".3gp";
-        rec.setOutputFile(file_name);
+        String s =file+"/"+current_time+".3gp";
+        rec.setOutputFile(s);
 
         try {
             rec.prepare();
         } catch (IOException e) {
             e.printStackTrace();
-            
+
             return;
         }
         rec.start();
+        file_name = s;
     }
 
 
@@ -375,6 +417,10 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                         reclamoDesc.setText(R.string.texto_vacio);
                         imageView.setImageBitmap(null);
                         pathOfPhoto = null;
+                        file_name = null;
+                        estadoBotones = Estado.NADA;
+                        actualizarBotonesDeReproducción(estadoBotones);
+
                         boolean edicionActivada = !tvCoord.getText().toString().equals("0.0;0.0");
                         reclamoDesc.setEnabled(edicionActivada );
                         mail.setEnabled(edicionActivada );

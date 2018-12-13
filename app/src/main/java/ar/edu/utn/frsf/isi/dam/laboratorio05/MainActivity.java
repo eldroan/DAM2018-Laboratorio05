@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         b.putDouble("Lat",c.latitude);
         b.putDouble("Lng",c.longitude);
         b.putBoolean("trySettingPhoto", true);
+        b.putBoolean("resetRecordPath",false);
         fragment.setArguments(b);
         //Deberia setear el listener? Supongo que no porque este fragment ya viene de creado
 
