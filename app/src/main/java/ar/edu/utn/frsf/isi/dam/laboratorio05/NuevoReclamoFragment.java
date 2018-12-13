@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,7 +46,10 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
     private static final int REQUEST_MICROPHONE = 1234;
 
     public void setImagePath(String pathPhoto) {
+
         pathOfPhoto = pathPhoto;
+        btnGuardar.setEnabled(comprobarSiPuedeGuardar());
+
         File file = new File(pathPhoto);
 
         Bitmap imageBitmap = null;
@@ -185,9 +189,28 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
         tvCoord.setText(lat+";"+lng);
         boolean edicionActivada = !tvCoord.getText().toString().equals("0.0;0.0");
         reclamoDesc.setEnabled(edicionActivada );
+        reclamoDesc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    btnGuardar.setEnabled(comprobarSiPuedeGuardar());
+                }
+            }
+        });
         mail.setEnabled(edicionActivada );
-        tipoReclamo.setEnabled(edicionActivada);
-        btnGuardar.setEnabled(edicionActivada);
+        tipoReclamo.setEnabled(true);
+        tipoReclamo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                btnGuardar.setEnabled(comprobarSiPuedeGuardar());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        btnGuardar.setEnabled(comprobarSiPuedeGuardar());
 
 
         /*buscarCoord.setOnClickListener(new View.OnClickListener() {
@@ -205,6 +228,17 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
             }
         });*/
         return v;
+    }
+
+    private boolean comprobarSiPuedeGuardar() {
+        Reclamo.TipoReclamo tipoSeleccionado = tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition());
+
+        if(tipoSeleccionado == Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO || tipoSeleccionado == Reclamo.TipoReclamo.VEREDAS){
+            return pathOfPhoto != null;
+        }else{
+            return (file_name != null) || reclamoDesc.getText().length() >=8;
+        }
+
     }
 
     private void actualizarBotonesDeReproducción(Estado est) {
@@ -269,6 +303,7 @@ public class NuevoReclamoFragment extends Fragment implements View.OnClickListen
                 if(estadoBotones == Estado.GRABANDO){
                     // Esta grabando
                     finalizarGrabacionDeAudio();
+                    btnGuardar.setEnabled(comprobarSiPuedeGuardar());
                 }else{
                     // Esta reproduciendo
                     if(mediaPlayer != null){
